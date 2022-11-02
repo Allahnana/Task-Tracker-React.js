@@ -2,37 +2,37 @@
 import Header from "./components/Header";
 import Task from "./components/Tasks";
 import AddTask from "./components/AddTask";
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 function App() {
   
+  const[showAddTask, setShowAddTask] = useState(true)
+  const [ tasks, setTasks] = useState([])
 
-  const [ tasks, setTasks] = useState([
-    {
-        id: 1,
-        text: 'Meeting the Doctor',
-        day: 'Monday, 12:00pm',
-        reminder: true
-      },
-      {
-        id: 2,
-        text: 'Going to school',
-        day: 'Tuesday, 01:45am',
-        reminder: false
-      },
-      {
-        id: 3,
-        text: 'Alhamdulillahi, its Friday',
-        day: 'Friday, 12:45pm',
-        reminder: true
-      },
-      {
-        id: 4,
-        text: 'Going on a date',
-        day: 'Saturday, 07:00am',
-        reminder: true
-      },
-])
+  useEffect(() => {
+    
+    const getTasks = async () => {
+      const tasksFromServer = await fetchTasks()
+      setTasks(tasksFromServer)
+    }
+
+    getTasks()
+   
+  }, [])
+
+
+  //Fetch Tasks
+
+  const fetchTasks = async () => {
+    const res = await fetch('http://localhost:5000/tasks')
+    const data = await res.json()
+
+    return data
+  }
+
+  fetchTasks()
+
+  
 
 
 //Add Task
@@ -60,8 +60,8 @@ const toggleReminder = (id) =>{
 
   return (
     <div className="container">
-      <Header/>
-      <AddTask onAdd = {addTask}/>
+      <Header  onAdd = { () => setShowAddTask(!showAddTask)} showAdd={showAddTask} />
+      { showAddTask && <AddTask onAdd = {addTask}/>}
       {tasks.length > 0 ? <Task tasks= {tasks} onDelete={deleteTask} onToggle={toggleReminder}/> : "No Task To Show"}
     </div>
   );
